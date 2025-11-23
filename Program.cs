@@ -29,18 +29,18 @@ namespace InternetShop
 
             Console.WriteLine(cart.Order().Paylink);
 
-            cart.Add(iPhone12, 9); 
+            cart.Add(iPhone12, 9);
         }
     }
 
     public class Good
     {
-        public string Name { get; private set; }
-
         public Good(string name)
         {
             Name = name;
         }
+
+        public string Name { get; private set; }
     }
 
     public class Storage
@@ -72,16 +72,37 @@ namespace InternetShop
     {
         public bool HaveGoods(Good good, int count)
         {
-            if (_goods.ContainsKey(good) && _goods[good] >= count)
-                return true;
-            else
+            if (_goods.ContainsKey(good) == false || _goods[good] < count)
+                return false;
+
+            return true;
+
+        }
+
+        public void RemoveGoods(Good good, int count)
+        {
+            if (good == null)
+                throw new ArgumentNullException();
+
+            if (count <= 0)
                 throw new ArgumentOutOfRangeException();
 
+            if (_goods.ContainsKey(good) == false)
+            {
+                throw new ArgumentOutOfRangeException();
+            }
+            else
+            {
+                _goods[good] = _goods[good] - count;
+
+                if (_goods[good] == 0)
+                    _goods.Remove(good);
+            }
         }
     }
 
     public class Shop
-    { 
+    {
         private Warehouse _warehouse;
 
         public Shop(Warehouse warehouse)
@@ -109,7 +130,10 @@ namespace InternetShop
                 throw new ArgumentOutOfRangeException();
 
             if (warehouse.HaveGoods(good, count))
+            {
+                warehouse.RemoveGoods(good, count);
                 Add(good, count);
+            }
         }
 
         public Order Order()
@@ -136,5 +160,6 @@ namespace InternetShop
     public interface IWarehouse
     {
         bool HaveGoods(Good good, int count);
+        void RemoveGoods(Good good, int count);
     }
 }
